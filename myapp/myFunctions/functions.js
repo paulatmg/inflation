@@ -1,5 +1,5 @@
 const axios = require('axios').default;
-
+var moment = require('moment');
 
 
 async function getNumber(number) {
@@ -8,15 +8,15 @@ async function getNumber(number) {
     return await response.data;
 }
 
-async function process(startDate, endDate, amount) {
-    console.log(startDate);
-    console.log(endDate);
-    console.log(amount);
-}
+// async function process(startDate, endDate, amount) {
+//     console.log(startDate);
+//     console.log(endDate);
+//     console.log(amount);
+// }
 
 async function startDate(date) {
     var numbers = /^[0-9]+$/;
-    if (date.match(numbers) && moment(req.query.startDate, 'YYYY-MM-DD').isValid()){
+    if (date.match(numbers) && moment(req.query.startDate, 'YYYY-MM').isValid()){
         return true
     }
     else{
@@ -26,7 +26,7 @@ async function startDate(date) {
 
 async function endDate(date) {
     var numbers = /^[0-9]+$/;
-    if (date.match(numbers) && moment(req.query.startDate, 'YYYY-MM-DD').isValid()){
+    if (date.match(numbers) && moment(req.query.startDate, 'YYYY-MM').isValid()){
         return true
     }
     else{
@@ -55,6 +55,55 @@ async function endPrice(price) {
         return "enter a valid price"
     }
 }
+
+
+
+async function process(startDate, endDate, amount) {
+var totalMonths = moment(endDate, 'YYYY-MM').diff(moment(startDate, 'YYYY-MM'), 'months' );
+var arrayOfMonths = [
+    moment(startDate, 'YYYY-MM').format('YYYYMM') // Must include the start month.
+];
+
+// add all months in between.
+for ( var i=1; i <= Number(totalMonths); i++ ) {
+    arrayOfMonths.push( moment(startDate, 'YYYY-MM').add( i, 'month').format('YYYYMM'));
+}
+
+arrayOfMonths.push( moment(startDate, 'YYYY-MM').add( i, 'month') ); // Must also include the last month
+
+
+console.log('Months: ', arrayOfMonths);
+}
+
+async function haha(){
+var joined = arrayOfMonths.join("%7C");
+var chosenMonths = joined.slice(0, -3);
+console.log('Chosen Months: ', chosenMonths);
+var apiDatafromMonths = `https://servicodados.ibge.gov.br/api/v3/agregados/118/periodos/${chosenMonths}/variaveis/306?localidades=N1[all]`;
+console.log('API DATA: ', apiDatafromMonths);
+}
+
+
+
+
+
+
+
+    // const apiData = {
+    //     "199801": "0.59",
+    //     "199802": "0.44",
+    //     "199803": "0.28",
+    //     "199804": "0.17",
+    //     "199805": "0.48"
+    // }
+
+    // const months = Object.values(apiData).map( value => (Number(value)/100) + 1 )
+    // const result = months.reduce( (accumulator, current) => accumulator * current, months[0] )
+
+    // console.log(result)
+
+
+
 
 
 // async function test(){
