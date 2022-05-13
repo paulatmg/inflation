@@ -16,20 +16,20 @@ async function getNumber(number) {
 
 async function startDate(date) {
     var numbers = /^[0-9]+$/;
-    if (date.match(numbers) && moment(req.query.startDate, 'YYYY-MM').isValid()){
+    if (date.match(numbers) && moment(req.query.startDate, 'YYYY-MM').isValid()) {
         return true
     }
-    else{
+    else {
         return "enter a valid date"
     }
 }
 
 async function endDate(date) {
     var numbers = /^[0-9]+$/;
-    if (date.match(numbers) && moment(req.query.startDate, 'YYYY-MM').isValid()){
+    if (date.match(numbers) && moment(req.query.startDate, 'YYYY-MM').isValid()) {
         return true
     }
-    else{
+    else {
         return "enter a valid date"
     }
 }
@@ -37,10 +37,10 @@ async function endDate(date) {
 
 async function startPrice(price) {
     var numbers = /^[0-9]+$/;
-    if (price.match(numbers) && price>0){
+    if (price.match(numbers) && price > 0) {
         return true
     }
-    else{
+    else {
         return "enter a valid price"
     }
 }
@@ -48,10 +48,10 @@ async function startPrice(price) {
 
 async function endPrice(price) {
     var numbers = /^[0-9]+$/;
-    if (price.match(numbers) && price>0){
+    if (price.match(numbers) && price > 0) {
         return true
     }
-    else{
+    else {
         return "enter a valid price"
     }
 }
@@ -59,48 +59,48 @@ async function endPrice(price) {
 
 
 async function process(startDate, endDate, amount) {
-var totalMonths = moment(endDate, 'YYYY-MM').diff(moment(startDate, 'YYYY-MM'), 'months' );
-var arrayOfMonths = [
-    moment(startDate, 'YYYY-MM').format('YYYYMM') // Must include the start month.
-];
+    var totalMonths = moment(endDate, 'YYYY-MM').diff(moment(startDate, 'YYYY-MM'), 'months');
+    var arrayOfMonths = [
+        moment(startDate, 'YYYY-MM').format('YYYYMM')
+    ];
 
-// add all months in between.
-for ( var i=1; i <= Number(totalMonths); i++ ) {
-    arrayOfMonths.push( moment(startDate, 'YYYY-MM').add( i, 'month').format('YYYYMM'));
-}
+    for (var i = 1; i <= Number(totalMonths); i++) {
+        arrayOfMonths.push(moment(startDate, 'YYYY-MM').add(i, 'month').format('YYYYMM'));
+    }
 
-arrayOfMonths.push( moment(startDate, 'YYYY-MM').add( i, 'month') ); // Must also include the last month
+    arrayOfMonths.push(moment(startDate, 'YYYY-MM').add(i, 'month'));
 
 
-console.log('Months: ', arrayOfMonths);
-}
-
-async function haha(){
-var joined = arrayOfMonths.join("%7C");
-var chosenMonths = joined.slice(0, -3);
-console.log('Chosen Months: ', chosenMonths);
-var apiDatafromMonths = `https://servicodados.ibge.gov.br/api/v3/agregados/118/periodos/${chosenMonths}/variaveis/306?localidades=N1[all]`;
-console.log('API DATA: ', apiDatafromMonths);
+    console.log('Months: ', arrayOfMonths);
 }
 
 
+async function haha(arrayOfMonths) {
+    var joined = arrayOfMonths.join("%7C");
+    var chosenMonths = joined.slice(0, -3);
+    console.log('Chosen Months: ', chosenMonths);
+    var apiDatafromMonths = `https://servicodados.ibge.gov.br/api/v3/agregados/118/periodos/${chosenMonths}/variaveis/306?localidades=N1[all]`;
+    console.log('API DATA: ', apiDatafromMonths);
+}
 
 
 
 
 
-    // const apiData = {
-    //     "199801": "0.59",
-    //     "199802": "0.44",
-    //     "199803": "0.28",
-    //     "199804": "0.17",
-    //     "199805": "0.48"
-    // }
 
-    // const months = Object.values(apiData).map( value => (Number(value)/100) + 1 )
-    // const result = months.reduce( (accumulator, current) => accumulator * current, months[0] )
 
-    // console.log(result)
+// const apiData = {
+//     "199801": "0.59",
+//     "199802": "0.44",
+//     "199803": "0.28",
+//     "199804": "0.17",
+//     "199805": "0.48"
+// }
+
+// const months = Object.values(apiData).map( value => (Number(value)/100) + 1 )
+// const result = months.reduce( (accumulator, current) => accumulator * current, months[0] )
+
+// console.log(result)
 
 
 
@@ -150,5 +150,6 @@ module.exports = {
     startDate,
     endDate,
     startPrice,
-    endPrice
+    endPrice,
+    haha
 }
