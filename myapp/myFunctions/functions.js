@@ -2,63 +2,30 @@ const axios = require('axios').default;
 var moment = require('moment');
 
 
-async function getNumber(number) {
-    console.log("parametroGetNumber", number);
-    const response = await axios.get(`https://catfact.ninja/fact?max_length=${number}`);
-    return await response.data;
+async function handler({ startDate, endDate, amount }) {
+    const isStartDateValid = await validateDate({ date: startDate });
+    const isEndDateValid = await validateDate({ date: endDate });
+
+    if (isStartDateValid === false || isEndDateValid === false) {
+        return "Please, type a valid date!"
+    }
+
+    const monthsRange = await getMonthsRange({ startDate, endDate });
+    const entireURL = await formatURL({ monthsRange });
+    const APIResponse = await fetchDataFromAPI({ url: entireURL });
+    const resultOfInflation = await calculateInflation({ dataFromAPI: APIResponse[0].resultados[0].series[0].serie, amount });
+    const resulttBasedOnAmount = amount - (amount * (resultOfInflation / 100));
+    const resultOfInvestiment = resulttBasedOnAmount.toString();
+
+    return `Investiment: R$${amount} <br></br> Inflation: ${parseFloat(resultOfInflation).toFixed(2)}% <br></br> Investiment based on inflation: R$${parseFloat(resultOfInvestiment).toFixed(2)}`;
+
 }
 
-// async function process(startDate, endDate, amount) {
-//     console.log(startDate);
-//     console.log(endDate);
-//     console.log(amount);
-// }
-
-async function startDate(date) {
-    var numbers = /^[0-9]+$/;
-    if (date.match(numbers) && moment(req.query.startDate, 'YYYY-MM').isValid()) {
-        return true
-    }
-    else {
-        return "enter a valid date"
-    }
+async function validateDate({ date }) {
+    return moment(date, 'YYYY-MM').isValid();
 }
 
-async function endDate(date) {
-    var numbers = /^[0-9]+$/;
-    if (date.match(numbers) && moment(req.query.startDate, 'YYYY-MM').isValid()) {
-        return true
-    }
-    else {
-        return "enter a valid date"
-    }
-}
-
-
-async function startPrice(price) {
-    var numbers = /^[0-9]+$/;
-    if (price.match(numbers) && price > 0) {
-        return true
-    }
-    else {
-        return "enter a valid price"
-    }
-}
-
-
-async function endPrice(price) {
-    var numbers = /^[0-9]+$/;
-    if (price.match(numbers) && price > 0) {
-        return true
-    }
-    else {
-        return "enter a valid price"
-    }
-}
-
-
-
-async function process(startDate, endDate, amount) {
+async function getMonthsRange({ startDate, endDate }) {
     var totalMonths = moment(endDate, 'YYYY-MM').diff(moment(startDate, 'YYYY-MM'), 'months');
     var arrayOfMonths = [
         moment(startDate, 'YYYY-MM').format('YYYYMM')
@@ -68,88 +35,35 @@ async function process(startDate, endDate, amount) {
         arrayOfMonths.push(moment(startDate, 'YYYY-MM').add(i, 'month').format('YYYYMM'));
     }
 
-    arrayOfMonths.push(moment(startDate, 'YYYY-MM').add(i, 'month'));
+    return arrayOfMonths;
+}
 
-
-    console.log('Months: ', arrayOfMonths);
+async function fetchDataFromAPI({ url }) {
+    const response = await axios.get(url);
+    return await response.data;
 }
 
 
-async function haha(arrayOfMonths) {
-    var joined = arrayOfMonths.join("%7C");
-    var chosenMonths = joined.slice(0, -3);
-    console.log('Chosen Months: ', chosenMonths);
-    var apiDatafromMonths = `https://servicodados.ibge.gov.br/api/v3/agregados/118/periodos/${chosenMonths}/variaveis/306?localidades=N1[all]`;
-    console.log('API DATA: ', apiDatafromMonths);
+async function formatURL({ monthsRange }) {
+    var joined = monthsRange.join("%7C");
+    return `https://servicodados.ibge.gov.br/api/v3/agregados/118/periodos/${joined}/variaveis/306?localidades=N1[all]`;
 }
 
 
 
+/* 
+Calculation based on this website:
+https://estudaradm.com.br/macroeconomia/calcular-inflacao-acumulada-em-12-meses-exemplos-e-exercicios/ 
+*/
+async function calculateInflation({ dataFromAPI }) {
+    const months = Object.values(dataFromAPI).map(value => (Number(value) / 100) + 1);
+    const result = months.reduce((accumulator, current) => accumulator * current, months[0]);
+    const finalResult = (result - 1) * 100;
+    return finalResult;
+}
 
-
-
-
-// const apiData = {
-//     "199801": "0.59",
-//     "199802": "0.44",
-//     "199803": "0.28",
-//     "199804": "0.17",
-//     "199805": "0.48"
-// }
-
-// const months = Object.values(apiData).map( value => (Number(value)/100) + 1 )
-// const result = months.reduce( (accumulator, current) => accumulator * current, months[0] )
-
-// console.log(result)
-
-
-
-
-
-// async function test(){
-//     const apiData = {
-//         "199801": "0.59",
-//         "199802": "0.44",
-//         "199803": "0.28",
-//         "199804": "0.17",
-//         "199805": "0.48"
-//     }
-//     const months = Object.keys(apiData);
-//     const totalmonths = months.length
-
-//     for (var i=0; i < totalmonths; i++) {
-//         var currentMonth = months[i];
-//         var currentMonthValue = apiData[currentMonth];
-//         apiData[currentMonth] = (apiData[currentMonth]/100) + 1;
-//     }
-
-//     console.log(apiData);
-
-
-
-//     const apiData = {
-//         "199801": "0.59",
-//         "199802": "0.44",
-//         "199803": "0.28",
-//         "199804": "0.17",
-//         "199805": "0.48"
-//     }
-
-//     const months = Object.values(apiData).map( value => (Number(value)/100) + 1 )
-//     const result = months.reduce( (accumulator, current) => accumulator * current, months[0] )
-
-//     console.log(result)
-
-// }
 
 
 module.exports = {
-    getNumber,
-    //firstWord, 
-    process,
-    startDate,
-    endDate,
-    startPrice,
-    endPrice,
-    haha
+    handler
 }
