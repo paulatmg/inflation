@@ -1,6 +1,6 @@
 var express = require('express');
 var router = express.Router();
-var functions = require('../myFunctions/functions2');
+var functions = require('../myFunctions/functions');
 var moment = require('moment');
 const axios = require('axios').default;
 
